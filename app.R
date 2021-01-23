@@ -1,6 +1,8 @@
 library(shiny)
 library(shinyjs)
 library(DT)
+library(shinyWidgets)
+library(rhandsontable)
 
 data_gdms <- readRDS("D:/Pralhad/git_CostEngineering/gdms_data.RDS")
 
@@ -125,7 +127,7 @@ input_tracksheet_UI <- function(id) {
              
              tags$br(),
              
-             fluidRow(column(12, DT::dataTableOutput(ns("tracksheet"))))
+             fluidRow(column(12, addSpinner(rHandsontableOutput(ns("tracksheet")), spin = "bounce", color = "#A65628")))
       )
     )
   )
@@ -143,6 +145,8 @@ tracksheet_function <- function(input, output, session){
   
   master <- readRDS("D:/Pralhad/git_CostEngineering/master.RDS")
   
+  rec_master <- reactiveFileReader(2000, NULL, 'D:/Pralhad/git_CostEngineering/master.RDS', readRDS)
+  
   
   reactValues_data <- reactiveVal(master)
   
@@ -159,7 +163,7 @@ tracksheet_function <- function(input, output, session){
     
     req(input$project_pn, input$project_rev)
     
-    dplyr::filter(reactValues_data(), PN_No == input$project_pn & Rev == input$project_rev)
+    dplyr::filter(rec_master(), PN_No == input$project_pn & Rev == input$project_rev)
   })
   
   observeEvent(reactive_data(), {
@@ -424,298 +428,55 @@ tracksheet_function <- function(input, output, session){
                                   Time = humanTime()
     )
     
-    reactValues_data <- rbind(tracksheet_neww, reactValues_data())
+    reactValues_data <- rbind(tracksheet_neww, rec_master())
     
     saveRDS(reactValues_data, "D:/Pralhad/git_CostEngineering/master.RDS", ascii = T)
     
   })
   
-  # observeEvent(input$update, {
-  
-  
-  #  new = as.character(interaction(input$project_pn, input$project_rev))
-  
-  # combine = as.character(interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev))
-  
-  
-  #as.character(reactValues_data$data$GDMS[match(new, combine)]) <<- as.character(input$gdms)
-  
-  
-  
-  
-  # reactValues_data$data$GDMS[match(
-  #   as.character(interaction(input$project_pn, input$project_rev)),
-  #   as.character(interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev))
-  # )] <<- as.character(input$gdms)
-  
-  # reactValues_data$data$Descr1[match(
-  #   as.character(interaction(input$project_pn, input$project_rev)),
-  #   as.character(interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev))
-  # )] <<- as.character(input$project_description1)
-  
-  #  reactValues_data$data$Descr2[match(
-  #    interaction(input$project_pn, input$project_rev),
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$project_description2)
-  
-  #  reactValues_data$data$Project[match(
-  #    interaction(input$project_pn, input$project_rev),
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$project)
-  
-  #  reactValues_data$data$Group[match(
-  #    interaction(input$project_pn, input$project_rev),
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$project_group)
-  
-  #  reactValues_data$data$Commodity[match(
-  #    interaction(input$project_pn, input$project_rev),
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$part_commodity)
-  
-  #  reactValues_data$data$Sub_Commodity[match(
-  #    interaction(input$project_pn, input$project_rev),
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$part_subcommodity)
-  
-  #  reactValues_data$data$Requestor[match(
-  #    interaction(input$project_pn, input$project_rev),
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$project_requestor)
-  
-  #  reactValues_data$data$Owner[match(
-  #    interaction(input$project_pn, input$project_rev),
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$project_owner)
-  
-  #  reactValues_data$data$Request_Date[match(
-  #    interaction(input$project_pn, input$project_rev),
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- input$date_request
-  
-  #  reactValues_data$data$Estimated_Delivery[match(
-  #    interaction(input$project_pn, input$project_rev),
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- input$date_estimate
-  
-  #  reactValues_data$data$Lead_Time[match(
-  #    interaction(input$project_pn, input$project_rev),
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$leadtime)
-  
-  #  reactValues_data$data$Delays[match(
-  #    interaction(input$project_pn, input$project_rev),
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$delays)
-  
-  #  reactValues_data$data$GDMS_Ear[match(
-  #    interaction(input$project_pn, input$project_rev),
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$gdms_ear)
-  
-  #  reactValues_data$data$Calc_Ear[match(
-  #    interaction(input$project_pn, input$project_rev),
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$calc_ear)
-  
-  #  reactValues_data$data$Plant[match(
-  #    interaction(input$project_pn, input$project_rev),
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$project_plant)
-  #  
-  #  reactValues_data$data$CA_No[match(
-  #    interaction(input$project_pn, input$project_rev),
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$ca_no)
-  
-  #  reactValues_data$data$Supplier_Region[match(
-  #    interaction(input$project_pn, input$project_rev),
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$supplier_region)
-  
-  #  reactValues_data$data$Supplier_Exworks[match(
-  #    interaction(input$project_pn, input$project_rev),
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$supplier_exworks)
-  
-  #  reactValues_data$data$Supplier_Currency[match(
-  #    interaction(input$project_pn, input$project_rev),
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$supplier_currency)
-  
-  #  reactValues_data$data$Supplier_Logistics[match(
-  #    interaction(input$project_pn, input$project_rev),
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$supplier_logistics)
-  
-  #  reactValues_data$data$Supplier_LandedCost[match(
-  #    interaction(input$project_pn, input$project_rev),
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$supplier_landedcost)
-  
-  #  reactValues_data$data$Supplier_LandedCurrency[match(
-  #    interaction(input$project_pn, input$project_rev),
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$supplier_landedcurrency)
-  
-  #  reactValues_data$data$Supplier_Name[match(
-  #    interaction(input$project_pn, input$project_rev),
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$supplier_name)
-  
-  #  reactValues_data$data$Calc_Region1[match(
-  #    interaction(input$project_pn, input$project_rev) ,
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$region1)
-  
-  #  reactValues_data$data$Calc_Exworks1[match(
-  #    interaction(input$project_pn, input$project_rev) ,
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$exworks1)
-  #  
-  #  reactValues_data$data$Calc_Currency1[match(
-  #    interaction(input$project_pn, input$project_rev) ,
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$currency1)
-  
-  #  reactValues_data$data$Calc_Logistics1[match(
-  #    interaction(input$project_pn, input$project_rev) ,
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$logistics1)
-  
-  #  reactValues_data$data$Calc_LandedCost1[match(
-  #    interaction(input$project_pn, input$project_rev) ,
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$landedcost1)
-  
-  #  reactValues_data$data$Calc_LandedCurrency1[match(
-  #    interaction(input$project_pn, input$project_rev) ,
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$landedcurrency1)
-  
-  #  reactValues_data$data$Analysis_Type[match(
-  #    interaction(input$project_pn, input$project_rev) ,
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$analysis_type)
-  
-  #  reactValues_data$data$Calc_Region2[match(
-  #    interaction(input$project_pn, input$project_rev) ,
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$region2)
-  
-  #  reactValues_data$data$Calc_Exworks2[match(
-  #    interaction(input$project_pn, input$project_rev) ,
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$exworks2)
-  
-  #  reactValues_data$data$Calc_Currency2[match(
-  #    interaction(input$project_pn, input$project_rev) ,
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  # )] <<- as.character(input$currency2)
-  
-  #  reactValues_data$data$Calc_Logistics2[match(
-  #    interaction(input$project_pn, input$project_rev) ,
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$logistics2)
-  
-  #  reactValues_data$data$Calc_LandedCost2[match(
-  #    interaction(input$project_pn, input$project_rev) ,
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$landedcost2)
-  
-  #  reactValues_data$data$Calc_LandedCurrency2[match(
-  #    interaction(input$project_pn, input$project_rev) ,
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$landedcurrency2)
-  
-  #  reactValues_data$data$Calc_Region3[match(
-  #    interaction(input$project_pn, input$project_rev) ,
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character(input$region3)
-  
-  #  reactValues_data$data$Calc_Exworks3[match(
-  #    interaction(input$project_pn, input$project_rev) ,
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  # )] <<- as.character(input$exworks3)
-  
-  # reactValues_data$data$Calc_Currency3[match(
-  #   interaction(input$project_pn, input$project_rev) ,
-  #   interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  # )] <<- as.character(input$currency3)
-  
-  # reactValues_data$data$Calc_Logistics3[match(
-  #   interaction(input$project_pn, input$project_rev) ,
-  #   interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  # )] <<- as.character(input$logistics3)
-  # 
-  #reactValues_data$data$Calc_LandedCost3[match(
-  #   interaction(input$project_pn, input$project_rev) ,
-  #  interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  # )] <<- as.character(input$landedcost3)
-  
-  #  reactValues_data$data$Calc_LandedCurrency3[match(
-  #  interaction(input$project_pn, input$project_rev) ,
-  #   interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #)] <<- as.character(input$landedcurrency3)
-  #
-  # reactValues_data$data$Project_Comment[match(
-  #    interaction(input$project_pn, input$project_rev) ,
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character( input$project_comment)
-  #  
-  # reactValues_data$data$Project_Status[match(
-  ##    interaction(input$project_pn, input$project_rev) ,
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character( input$project_status)
-  
-  #   reactValues_data$data$Potential_Savings[match(
-  #    interaction(input$project_pn, input$project_rev) ,
-  #     interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #   )] <<- as.character( input$potential)
-  
-  #  reactValues_data$data$Potential_Currency[match(
-  #     interaction(input$project_pn, input$project_rev) ,
-  #     interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #   )] <<- as.character( input$potential_currency)
-  
-  #  reactValues_data$data$Actual_Savings[match(
-  #    interaction(input$project_pn, input$project_rev) ,
-  #    interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character( input$actual_saving)
-  
-  #  reactValues_data$data$Actual_Currency[match(
-  #   interaction(input$project_pn, input$project_rev) ,
-  #   interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  #  )] <<- as.character( input$actual_currency)
-  
-  #  reactValues_data$data$Time[match(
-  #   interaction(input$project_pn, input$project_rev) ,
-  #   interaction(reactValues_data$data$PN_No, reactValues_data$data$Rev)
-  # )] <<- humanTime()
-  
-  
-  
-  #  saveRDS(reactValues_data$data, "/srv/shiny-server/database/master.RDS", ascii = T)
-  
-  #  })
-  
-  # output$tracksheet <- renderRHandsontable({
-  
-  #   rhandsontable(reactValues_data()) %>%
-  #    hot_cols(colWidths = 150)
-  # })
-  
-  observeEvent(input$refresh, {
+  output$tracksheet <- renderRHandsontable({
     
-    master <- readRDS("D:/Pralhad/git_CostEngineering/master.RDS")
-    
-    output$tracksheet <- DT::renderDataTable(
-      master,
-      options = list(scrollX = TRUE),
-      class = 'cell-border stripe'
-    )
+    rhandsontable(rec_master())
     
   })
+  
+   
+   
+   observeEvent(input$refresh, {
+       
+       d <- as.data.frame(hot_to_r(input$tracksheet)) 
+       
+       saveRDS(d, "D:/Pralhad/git_CostEngineering/master.RDS", ascii = T)
+    
+     
+   })
+ 
+  
+
+    
+   # output$tracksheet <- renderDT(
+   #  rec_master(),
+   #    options = list(scrollX = TRUE),
+   #    editable = list(target = 'cell', disable = list(columns = c(1, 2, 3, 53))),
+   #    class = 'cell-border stripe'
+   #  )
+   #  
+   #  proxy <- dataTableProxy("tracksheet")
+   #  
+   #  observeEvent(input$tracksheet_cell_edit, {
+   #    
+   #    
+   #    info = input$tracksheet_cell_edit
+   #    str(info)
+   #    i = info$row
+   #    j = info$col 
+   #    v = info$value
+   #    master[i, j] <<- DT::coerceValue(v, rec_master()[i, j])
+   #    replaceData(proxy, master, resetPaging = F)
+   #    
+   #    saveRDS(master, "D:/Pralhad/git_CostEngineering/master.RDS", ascii = T)
+   #  })
+   #  
   
   
   # observeEvent(input$tracksheet_cell_edit, {
