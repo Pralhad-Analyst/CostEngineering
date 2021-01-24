@@ -1,6 +1,5 @@
 library(shiny)
 library(shinyjs)
-library(DT)
 library(shinyWidgets)
 library(rhandsontable)
 
@@ -26,7 +25,7 @@ humanTime <- function() format(Sys.time(), "%Y%m%d-%H%M%OS")
 input_tracksheet_UI <- function(id) {
   ns = NS(id)
   
-  wellPanel(
+  wellPanel(style = "background: #ffffff",
     fluidRow(
       column(12,
              h3("Tracksheet Fillup Form"),
@@ -110,24 +109,29 @@ input_tracksheet_UI <- function(id) {
                column(1,
                       actionButton(ns("new"), "Add new Part No.", style = "color: #fff; background-color: #007BFF; border-color: #2e6da4")
                )
-               #column(1,
-               #       offset = 2,
-               #       actionButton("save", "Update Existing Part No.", style = "color: #fff; background-color: #26B99A; border-color: #26B99A")
-               #)
              ),
              tags$hr(),
              
              fluidRow(
-               column(12, h4("Tracksheet Table")),
+               column(12, h4("Tracksheet Table"))),
+               
+             fluidRow(
+               column(12, helpText("Note : Please Save the Changes before leaving the application"))),
                
                tags$br(),
-               actionButton(ns("refresh"), "Refresh")
+             fluidRow(
+               column(1, actionButton(ns("save"), "Save", style = "color: #fff; background-color: #26B99A; border-color: #26B99A"))
                
              ),
              
              tags$br(),
              
-             fluidRow(column(12, addSpinner(rHandsontableOutput(ns("tracksheet")), spin = "bounce", color = "#A65628")))
+             fluidRow(column(12, addSpinner(rHandsontableOutput(ns("tracksheet")), spin = "bounce", color = "#bfbfbb"))),
+             
+             tags$hr(),
+             
+             fluidRow(column(2, offset = 10, h6("Cost Engineering Department"))
+             )
       )
     )
   )
@@ -143,8 +147,6 @@ tracksheet_function <- function(input, output, session){
     
   })
   
-  master <- readRDS("D:/Pralhad/git_CostEngineering/master.RDS")
-  
   rec_master <- reactiveFileReader(2000, NULL, 'D:/Pralhad/git_CostEngineering/master.RDS', readRDS)
   
   
@@ -159,16 +161,8 @@ tracksheet_function <- function(input, output, session){
     dplyr::filter(data_gdms, PartNumber == input$project_pn & Revision == input$project_rev)
   })
   
-  reactive_data1 <- reactive({
-    
-    req(input$project_pn, input$project_rev)
-    
-    dplyr::filter(rec_master(), PN_No == input$project_pn & Rev == input$project_rev)
-  })
   
   observeEvent(reactive_data(), {
-    
-    tracksheet <- reactive_data1()
     
     gdms <- reactive_data()
     
@@ -231,142 +225,6 @@ tracksheet_function <- function(input, output, session){
     reg3 <- as.character(gdms$PSI_ShouldCost3Region[1])
     
     updateTextInput(session, "region3", value = reg3)
-    
-    reqs <- as.character(tracksheet$Requestor[1])
-    
-    updateTextInput(session, "project_requestor", value = reqs)
-    
-    own <- as.character(tracksheet$Owner[1])
-    
-    updateTextInput(session, "project_owner", value = own)
-    
-    reqDate <- tracksheet$Request_Date[1]
-    
-    updateDateInput(session, "date_request", value = reqDate)
-    
-    estDate <- tracksheet$Estimated_Delivery[1]
-    
-    updateDateInput(session, "date_estimate", value = estDate)
-    
-    actDate <- tracksheet$Actual_Delivery[1]
-    
-    updateDateInput(session, "date_actual", value = actDate)
-    
-    leadTime <- as.character(tracksheet$Lead_Time[1])
-    
-    updateNumericInput(session, "leadtime", value = leadTime)
-    
-    delay <- as.character(tracksheet$Delays[1])
-    
-    updateNumericInput(session, "delays", value = delay)
-    
-    gdmsEar <- as.character(tracksheet$GDMS_Ear[1])
-    
-    updateTextInput(session, "gdms_ear", value = gdmsEar)
-    
-    calcEar <- as.character(tracksheet$Calc_Ear[1])
-    
-    updateNumericInput(session, "calc_ear", value = calcEar)
-    
-    plant <- as.character(tracksheet$Plant[1])
-    
-    updateTextInput(session, "project_plant", value = plant)
-    
-    ca <- as.character(tracksheet$CA_No[1])
-    
-    updateTextInput(session, "ca_no", value = ca)
-    
-    s_region <- as.character(tracksheet$Supplier_Region[1])
-    
-    updateTextInput(session, "supplier_region", value = s_region)
-    
-    s_exwork <- as.character(tracksheet$Supplier_Exworks[1])
-    
-    updateNumericInput(session, "supplier_exworks", value = s_exwork)
-    
-    s_curr <- as.character(tracksheet$Supplier_Currency[1])
-    
-    updateTextInput(session, "supplier_currency", value = s_curr)
-    
-    s_log <- as.character(tracksheet$Supplier_Logistics[1])
-    
-    updateTextInput(session, "supplier_logistics", value = s_log)
-    
-    s_land <- as.character(tracksheet$Supplier_LandedCost[1])
-    
-    updateNumericInput(session, "supplier_landedcost", value = s_land)
-    
-    s_landCurr <- as.character(tracksheet$Supplier_LandedCurrency[1])
-    
-    updateTextInput(session, "supplier_landedcurrency", value = s_landCurr)
-    
-    s_name <- as.character(tracksheet$Supplier_Name[1])
-    
-    updateTextInput(session, "supplier_name", value = s_name)
-    
-    log1 <- as.character(tracksheet$Calc_Logistics1[1])
-    
-    updateNumericInput(session, "logistics1", value = log1)
-    
-    land1 <- as.character(tracksheet$Calc_LandedCost1[1])
-    
-    updateNumericInput(session, "landedcost1", value = land1)
-    
-    landCurr1 <- as.character(tracksheet$Calc_LandedCurrency1[1])
-    
-    updateTextInput(session, "landedcurrency1", value = landCurr1)
-    
-    ana <- as.character(tracksheet$Analysis_Type[1])
-    
-    updateTextInput(session, "analysis_type", value = ana)
-    
-    log2 <- as.character(tracksheet$Calc_Logistics2[1])
-    
-    updateNumericInput(session, "logistics2", value = log2)
-    
-    land2 <- as.character(tracksheet$Calc_LandedCost2[1])
-    
-    updateNumericInput(session, "landedcost2", value = land2)
-    
-    landCurr2 <- as.character(tracksheet$Calc_LandedCurrency2[1])
-    
-    updateTextInput(session, "landedcurrency2", value = landCurr2)
-    
-    log3 <- as.character(tracksheet$Calc_Logistics3[1])
-    
-    updateNumericInput(session, "logistics3", value = log3)
-    
-    land3 <- as.character(tracksheet$Calc_LandedCost3[1])
-    
-    updateNumericInput(session, "landedcost3", value = land3)
-    
-    landCurr3 <- as.character(tracksheet$Calc_LandedCurrency3[1])
-    
-    updateTextInput(session, "landedcurrency3", value = landCurr3)
-    
-    comt <- as.character(gdms$PSI_ShouldCostNotesAndAssumptions[1])
-    
-    updateTextAreaInput(session, "project_comment", value = comt)
-    
-    stat <- as.character(tracksheet$Project_Status[1])
-    
-    updateTextInput(session, "project_status", value = stat)
-    
-    pot <- as.character(tracksheet$Potential_Savings[1])
-    
-    updateNumericInput(session, "potential", value = pot)
-    
-    potCurr <- as.character(tracksheet$Potential_Currency[1])
-    
-    updateTextInput(session, "potential_currency", value = potCurr)
-    
-    actSaving <- as.character(tracksheet$Actual_Savings[1])
-    
-    updateNumericInput(session, "actual_saving", value = actSaving)
-    
-    actCurr <- as.character(tracksheet$Actual_Currency[1])
-    
-    updateTextInput(session, "actual_currency", value = actCurr)
     
   })
   
@@ -432,68 +290,33 @@ tracksheet_function <- function(input, output, session){
     
     saveRDS(reactValues_data, "D:/Pralhad/git_CostEngineering/master.RDS", ascii = T)
     
+    showNotification("New Part No. Added", type = "warning")
+    
   })
   
   output$tracksheet <- renderRHandsontable({
     
-    rhandsontable(rec_master())
+    rhandsontable(rec_master(), height = 600) %>%
+      hot_col(col = "GDMS", type = 'dropdown', source = c("Yes", "No")) %>%
+      hot_col(col = "PN_No", readOnly = T) %>%
+      hot_col(col = "Rev", readOnly = T) %>%
+      hot_col(col = "Time", readOnly = T) %>%
+      hot_context_menu(allowRowEdit = F, allowColEdit = F) 
     
   })
   
    
    
-   observeEvent(input$refresh, {
+   observeEvent(input$save, {
        
        d <- as.data.frame(hot_to_r(input$tracksheet)) 
        
        saveRDS(d, "D:/Pralhad/git_CostEngineering/master.RDS", ascii = T)
+       
+       showNotification("Changes Saved Successfully", type = "message")
     
      
    })
- 
-  
-
-    
-   # output$tracksheet <- renderDT(
-   #  rec_master(),
-   #    options = list(scrollX = TRUE),
-   #    editable = list(target = 'cell', disable = list(columns = c(1, 2, 3, 53))),
-   #    class = 'cell-border stripe'
-   #  )
-   #  
-   #  proxy <- dataTableProxy("tracksheet")
-   #  
-   #  observeEvent(input$tracksheet_cell_edit, {
-   #    
-   #    
-   #    info = input$tracksheet_cell_edit
-   #    str(info)
-   #    i = info$row
-   #    j = info$col 
-   #    v = info$value
-   #    master[i, j] <<- DT::coerceValue(v, rec_master()[i, j])
-   #    replaceData(proxy, master, resetPaging = F)
-   #    
-   #    saveRDS(master, "D:/Pralhad/git_CostEngineering/master.RDS", ascii = T)
-   #  })
-   #  
-  
-  
-  # observeEvent(input$tracksheet_cell_edit, {
-  #     cell <- input$table_cell_edit
-  #     newdf <- reactValues_data()
-  #     newdf[cell$row, cell$col] <- cell$value
-  #     reactValues_data(newdf)
-  #   })
-  
-  # reactive_table <- reactive({input$tracksheet})
-  
-  
-  # observeEvent(input$save, {
-  
-  #  saveRDS(hot_to_r(reactive_table()), "/srv/shiny-server/costengineering/database/master.RDS", ascii = T)
-  
-  # })
   
 }
 
