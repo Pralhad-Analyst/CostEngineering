@@ -12,6 +12,17 @@ labelMandatory <- function(label) {
   )
 }
 
+text_renderer <- "
+  function (instance, td, row, col, prop, value, cellProperties) {
+    Handsontable.renderers.TextRenderer.apply(this, arguments);
+    # This is the column which you want to check for coloring
+    var col_value = instance.getData()[row][2]
+    if (col_value == 'C') {
+      td.style.background = 'pink';
+    } else if (col_value == 'D') {
+      td.style.background = 'green';
+    }
+  }"
 
 
 fieldsMandatory <- c("project_pn", "project_rev",  "project_status")
@@ -296,12 +307,42 @@ tracksheet_function <- function(input, output, session){
   
   output$tracksheet <- renderRHandsontable({
     
-    rhandsontable(rec_master(), height = 600) %>%
+    rhandsontable(rec_master(), height = 600, search = T) %>%
       hot_col(col = "GDMS", type = 'dropdown', source = c("Yes", "No")) %>%
       hot_col(col = "PN_No", readOnly = T) %>%
       hot_col(col = "Rev", readOnly = T) %>%
       hot_col(col = "Time", readOnly = T) %>%
-      hot_context_menu(allowRowEdit = F, allowColEdit = F) 
+      hot_col(col = "Descr1", type = "autocomplete") %>%
+      hot_col(col = "Descr2", type = "autocomplete") %>%
+      hot_col(col = "Project", type = "autocomplete") %>%
+      hot_col(col = "Group", type = "autocomplete") %>%
+      hot_col(col = "Commodity", type = "autocomplete") %>%
+      hot_col(col = "Sub_Commodity", type = "autocomplete") %>%
+      hot_col(col = "Requestor", type = "autocomplete") %>%
+      hot_col(col = "Owner", type = "autocomplete") %>%
+      hot_col(col = "Plant", type = "autocomplete") %>%
+      hot_col(col = "CA_No", type = "autocomplete") %>%
+      hot_col(col = "Supplier_Region", type = "autocomplete") %>%
+      hot_col(col = "Supplier_Currency", type = "autocomplete") %>%
+      hot_col(col = "Supplier_LandedCurrency", type = "autocomplete") %>%
+      hot_col(col = "Supplier_Name", type = "autocomplete") %>%
+      hot_col(col = "Calc_Region1", type = "autocomplete") %>%
+      hot_col(col = "Calc_Currency1", type = "autocomplete") %>%
+      hot_col(col = "Calc_LandedCurrency1", type = "autocomplete") %>%
+      hot_col(col = "Calc_Region2", type = "autocomplete") %>%
+      hot_col(col = "Calc_Currency2", type = "autocomplete") %>%
+      hot_col(col = "Calc_LandedCurrency2", type = "autocomplete") %>%
+      hot_col(col = "Calc_Region3", type = "autocomplete") %>%
+      hot_col(col = "Calc_Currency3", type = "autocomplete") %>%
+      hot_col(col = "Calc_LandedCurrency3", type = "autocomplete") %>%
+      hot_col(col = "Project_Comment", type = "autocomplete") %>%
+      hot_col(col = "Project_Status", type = "autocomplete") %>%
+      hot_col(col = "Potential_Currency", type = "autocomplete") %>%
+      hot_col(col = "Actual_Currency", type = "autocomplete") %>%  
+      
+      hot_context_menu(allowRowEdit = T, allowColEdit = F) %>%
+      hot_cols(fixedColumnsLeft = 3)
+    
     
   })
   
